@@ -29,7 +29,8 @@ To run this project:
 1. create a python virtual environment with `python3 -m venv venv
 2. activate it with `. venv/bin/activate`
 3. assure flaskr is installed
-4. run in development mode with `export FLASK_APP=flaskr`, `export FLASK_ENV=development`, and `flask run`
+4. initialize the database for this instance with `flask init-db`
+5. run in development mode with `export FLASK_APP=flaskr`, `export FLASK_ENV=development`, and `flask run`
 
 Here are the steps I took to build it:
 1. Followed Flask tutorial in Python (with basic HTML, CSS, JS) to build a microblog and save users/posts to an SQLite database

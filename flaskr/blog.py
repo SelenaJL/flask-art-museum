@@ -1,7 +1,10 @@
+import os
+
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for
 )
 from werkzeug.exceptions import abort
+from werkzeug.utils import secure_filename
 
 from flaskr.auth import login_required
 from flaskr.db import get_db
@@ -17,11 +20,17 @@ def index():
     # fetch all from post table and order to show most recent first
     # use JOIN to include author information from the user table in the result
     posts = db.execute(
-        'SELECT p.id, title, body, created, author_id, username'
+        'SELECT p.id, title, body, filename, created, author_id, username'
         ' FROM post p JOIN user u ON p.author_id = u.id'
         ' ORDER BY created DESC'
     ).fetchall()
     return render_template('blog/index.html', posts=posts)
+
+
+# helper function to check if file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and \
+	filename.rsplit('.', 1)[1].lower() in ['pdf', 'png', 'jpg', 'jpeg']
 
 
 # create CREATE view
@@ -32,21 +41,31 @@ def create():
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
+        file = request.files['file']
         error = None
 	
-	# validate title is not empty
+	# validate title is not empty 
         if not title:
             error = 'Title is required.'
+        # validate photo was uploaded and file extension is allowed
+        elif not (file or file.filename):
+            error = 'Photo is required.'
+        elif not allowed_file(file.filename):
+            error = 'File extension not allowed, please upload one of: pdf, png, jpg, jpeg.'
 
-	# show error message or add new post to db
+	# show error message or proceed
         if error is not None:
             flash(error)
         else:
+	    # save file
+            filename = secure_filename(file.filename) # protect against dangerous file names
+            file.save(os.path.join('flaskr/static', filename))
+	    # add new post to db
             db = get_db()
             db.execute(
-                'INSERT INTO post (title, body, author_id)'
-                ' VALUES (?, ?, ?)',
-                (title, body, g.user['id'])
+                'INSERT INTO post (title, body, filename, author_id)'
+                ' VALUES (?, ?, ?, ?)',
+                (title, body, filename, g.user['id'])
             )
             db.commit()
             return redirect(url_for('blog.index'))
