@@ -1,9 +1,9 @@
 <!doctype html>
 <!-- block title/header/content will be overriden in other templates -->
-<title>{% block title %}{% endblock %} - Flaskr</title>
+<title>{% block title %}{% endblock %} - Framebook</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <nav>
-  <h1>Flaskr</h1>
+  <h1>Framebook: A Picture Perfect Place</h1>
   <ul>
     {% if g.user %}
       <li><span>{{ g.user['username'] }}</span>
